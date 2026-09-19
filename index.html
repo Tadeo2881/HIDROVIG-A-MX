@@ -1,17 +1,1482 @@
-{
-  "name": "HIDROVIGÍA MX",
-  "short_name": "HIDROVIGÍA",
-  "description": "Monitoreo y cierre preventivo de agua — cada litro cuenta.",
-  "start_url": "./hidrovigia-mx.html",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#050B18",
-  "theme_color": "#0891B2",
-  "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HIDROVIGÍA MX</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0891B2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HIDROVIGÍA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EAF3FB; --bg-2: #DCEBFB; --surface: rgba(255,255,255,0.72); --surface-raised: rgba(255,255,255,0.9);
+    --text: #0A1A33; --muted: #56698C; --border: rgba(10,26,51,0.10);
+    --accent-flow: #0891B2; --accent-flow-2: #6D5DF6; --accent-flow-soft: rgba(8,145,178,0.12);
+    --accent-alarm: #E11D48; --accent-alarm-soft: rgba(225,29,72,0.12);
+    --accent-warn: #D97706; --accent-warn-soft: rgba(217,119,6,0.13);
+    --accent-grace: #6D5DF6; --accent-grace-soft: rgba(109,93,246,0.12);
+    --shadow: 0 1px 2px rgba(10,26,51,0.05), 0 8px 28px rgba(10,26,51,0.08);
+    --glass-blur: 18px;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #050B18; --bg-2: #0A1230; --surface: rgba(255,255,255,0.055); --surface-raised: rgba(255,255,255,0.09);
+      --text: #EAF2FF; --muted: #8FA3C7; --border: rgba(255,255,255,0.09);
+      --accent-flow: #22D3EE; --accent-flow-2: #A78BFA; --accent-flow-soft: rgba(34,211,238,0.14);
+      --accent-alarm: #FB7185; --accent-alarm-soft: rgba(251,113,133,0.16);
+      --accent-warn: #FBBF54; --accent-warn-soft: rgba(251,191,84,0.16);
+      --accent-grace: #A78BFA; --accent-grace-soft: rgba(167,139,250,0.16);
+      --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 10px 34px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #050B18; --bg-2: #0A1230; --surface: rgba(255,255,255,0.055); --surface-raised: rgba(255,255,255,0.09);
+    --text: #EAF2FF; --muted: #8FA3C7; --border: rgba(255,255,255,0.09);
+    --accent-flow: #22D3EE; --accent-flow-2: #A78BFA; --accent-flow-soft: rgba(34,211,238,0.14);
+    --accent-alarm: #FB7185; --accent-alarm-soft: rgba(251,113,133,0.16);
+    --accent-warn: #FBBF54; --accent-warn-soft: rgba(251,191,84,0.16);
+    --accent-grace: #A78BFA; --accent-grace-soft: rgba(167,139,250,0.16);
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 10px 34px rgba(0,0,0,0.35);
+  }
+  html, body { height: 100%; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--text);
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: var(--bg);
+    position: relative;
+    overflow-x: hidden;
+  }
+  .bg-blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .bg-blobs span {
+    position: absolute; border-radius: 50%; filter: blur(64px); opacity: 0.55;
+    background: radial-gradient(circle at 30% 30%, var(--accent-flow), transparent 70%);
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+  .bg-blobs span:nth-child(1) { width: 320px; height: 320px; top: -80px; left: -60px; }
+  .bg-blobs span:nth-child(2) {
+    width: 280px; height: 280px; bottom: -60px; right: -70px;
+    background: radial-gradient(circle at 60% 40%, var(--accent-flow-2), transparent 70%);
+    animation-duration: 26s; animation-delay: -6s;
+  }
+  .bg-blobs span:nth-child(3) {
+    width: 220px; height: 220px; top: 40%; left: 60%;
+    background: radial-gradient(circle at 50% 50%, var(--accent-grace), transparent 70%);
+    opacity: 0.35; animation-duration: 30s; animation-delay: -12s;
+  }
+  @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(24px,-18px) scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) { .bg-blobs span { animation: none; } }
+  .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 20px 18px calc(28px + env(safe-area-inset-bottom, 0px)); min-height: 100%; }
+  button:focus-visible, input:focus-visible, .file-btn:focus-within { outline: 2px solid var(--accent-flow); outline-offset: 2px; }
+  header { position: sticky; top: env(safe-area-inset-top, 0px); background: linear-gradient(var(--bg) 65%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 6px 0 14px; display: flex; align-items: center; justify-content: space-between; z-index: 5; }
+  .brand { display: flex; align-items: baseline; gap: 8px; }
+  .brand-mark { font-size: 20px; }
+  .brand-name { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 12px; color: var(--muted); }
+  .status-pill { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 100px; font-size: 12.5px; font-weight: 600; background: var(--accent-flow-soft); color: var(--accent-flow); box-shadow: 0 0 0 1px var(--accent-flow-soft), 0 0 18px -4px var(--accent-flow); transition: background 0.3s, color 0.3s, box-shadow 0.3s; white-space: nowrap; }
+  .status-pill.warn { background: var(--accent-warn-soft); color: var(--accent-warn); box-shadow: 0 0 0 1px var(--accent-warn-soft), 0 0 18px -4px var(--accent-warn); }
+  .status-pill.alarm { background: var(--accent-alarm-soft); color: var(--accent-alarm); box-shadow: 0 0 0 1px var(--accent-alarm-soft), 0 0 18px -4px var(--accent-alarm); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status-pill.ok .status-dot { animation: pulse 1.8s ease-in-out infinite; }
+  .status-pill.warn .status-dot { animation: pulse 0.9s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .hero {
+    background: linear-gradient(155deg, var(--surface), var(--surface) 60%, var(--accent-flow-soft));
+    border: 1px solid var(--border); border-radius: 24px; padding: 24px 20px;
+    box-shadow: var(--shadow); margin-bottom: 14px; position: relative; overflow: hidden;
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(155deg, var(--accent-flow), transparent 45%, var(--accent-flow-2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.6; pointer-events: none;
+  }
+  .hero-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; position: relative; }
+  .hero-metric-label { font-size: 12.5px; color: var(--muted); margin: 0 0 4px; }
+  .hero-metric-value {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 40px; line-height: 1; letter-spacing: -0.01em;
+    background: linear-gradient(100deg, var(--accent-flow), var(--accent-flow-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-metric-unit { font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: var(--muted); margin-left: 4px; }
+  .hero-secondary { text-align: right; }
+  .hero-secondary .hero-metric-value { font-size: 22px; background: none; -webkit-background-clip: initial; background-clip: initial; color: var(--text); }
+  .cost-line { font-size: 11.5px; color: var(--muted); margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
+
+  .stage-chip { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 6px 11px; border-radius: 100px; font-size: 12px; font-weight: 600; background: var(--accent-grace-soft); color: var(--accent-grace); }
+  .stage-chip.hidden { display: none; }
+  .stage-chip.reduced { background: var(--accent-warn-soft); color: var(--accent-warn); }
+  .stage-chip.closed { background: var(--accent-alarm-soft); color: var(--accent-alarm); }
+
+  .chart-wrap { margin-top: 18px; }
+  .chart-caption { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  svg.flow-chart { width: 100%; height: 86px; display: block; overflow: visible; }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); }
+  .section h2 { font-size: 14.5px; font-weight: 600; margin: 0 0 4px; }
+  .section .hint { font-size: 12.5px; color: var(--muted); margin: 0 0 14px; line-height: 1.45; }
+
+  .segmented { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 3px; gap: 3px; margin-bottom: 14px; }
+  .segmented button { flex: 1; border: none; background: transparent; padding: 9px 8px; font-size: 12.5px; border-radius: 9px; color: var(--muted); }
+  .segmented button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+  .toggle-row .toggle-label { font-size: 13px; }
+  .toggle-row .toggle-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .switch { position: relative; width: 42px; height: 24px; flex: none; }
+  .switch input { opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; position: absolute; z-index: 2; }
+  .switch .track { position: absolute; inset: 0; background: var(--border); border-radius: 100px; transition: background 0.2s; }
+  .switch .thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: var(--shadow); transition: transform 0.2s; }
+  .switch input:checked + .track { background: var(--accent-flow); }
+  .switch input:checked ~ .thumb { transform: translateX(18px); }
+  .soon-badge { flex: none; font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 100px; background: var(--accent-grace-soft); color: var(--accent-grace); white-space: nowrap; }
+
+  .tariff-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .tariff-row label { font-size: 12.5px; color: var(--muted); flex: 1; }
+  .tariff-row input[type="number"] { width: 90px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+
+  .stage-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .stage-row label { font-size: 12.5px; width: 118px; flex: none; color: var(--muted); }
+  .stage-row input[type="range"] { flex: 1; accent-color: var(--accent-flow); }
+  .stage-readout { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; min-width: 84px; text-align: right; }
+
+  .timeline { display: flex; height: 8px; border-radius: 100px; overflow: hidden; border: 1px solid var(--border); background: var(--bg-2); margin-top: 16px; }
+  .timeline .seg { height: 100%; }
+  .timeline .seg.normal { background: linear-gradient(90deg, var(--accent-flow), var(--accent-flow-2)); }
+  .timeline .seg.reduced { background: var(--accent-warn); }
+  .marker-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  .progress-track { margin-top: 14px; height: 9px; border-radius: 100px; background: var(--bg-2); border: 1px solid var(--border); overflow: hidden; position: relative; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-flow), var(--accent-flow-2)); background-size: 200% 100%; transition: width 0.4s ease, background 0.4s ease; animation: shimmer 2.4s linear infinite; }
+  .progress-fill.warn { background: linear-gradient(90deg, var(--accent-warn), var(--accent-alarm)); background-size: 200% 100%; }
+  .progress-fill.alarm { background: var(--accent-alarm); animation: none; }
+  @keyframes shimmer { from { background-position: 0% 0; } to { background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce) { .progress-fill { animation: none; } }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+  button { font-family: inherit; font-size: 13.5px; font-weight: 600; border-radius: 12px; padding: 11px 16px; border: 1px solid var(--border); background: var(--surface-raised); color: var(--text); cursor: pointer; transition: transform 0.15s ease, background 0.2s; flex: 1; min-width: 0; }
+  button:active { transform: scale(0.97); }
+  button.primary { background: linear-gradient(100deg, var(--accent-flow), var(--accent-flow-2)); color: #04102A; border-color: transparent; }
+  button.grace { background: var(--accent-grace-soft); color: var(--accent-grace); border-color: transparent; }
+  button.danger { background: var(--accent-alarm-soft); color: var(--accent-alarm); border-color: transparent; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .hold-btn { position: relative; overflow: hidden; }
+  .hold-btn .hold-fill { position: absolute; inset: 0; background: rgba(255,255,255,0.28); width: 0%; transition: width 0.05s linear; }
+  .hold-btn span { position: relative; }
+  .reset-big { width: 100%; margin-top: 12px; padding: 20px 16px; font-size: 16px; border-radius: 16px; letter-spacing: 0.01em; }
+  .reset-big:not(:disabled) { background: linear-gradient(100deg, var(--accent-alarm), var(--accent-grace)); color: #fff; box-shadow: 0 6px 22px -4px var(--accent-alarm); animation: reset-attention 1.6s ease-in-out infinite; }
+  @keyframes reset-attention { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
+
+  .grace-note { font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+
+  .log-empty { font-size: 13px; color: var(--muted); padding: 10px 0 2px; }
+  .log-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-top: 1px solid var(--border); gap: 12px; }
+  .log-item:first-child { border-top: none; }
+  .log-date { font-size: 13px; font-weight: 600; }
+  .log-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .log-vol { font-family: 'IBM Plex Mono', monospace; font-size: 13px; white-space: nowrap; }
+  .log-vol.reduced { color: var(--accent-warn); }
+  .log-vol.closed { color: var(--accent-alarm); }
+  .log-vol.grace { color: var(--accent-grace); }
+
+  .week-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; margin-top: 4px; }
+  .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .week-bar-track { width: 100%; height: 74px; display: flex; align-items: flex-end; }
+  .week-bar { width: 100%; background: linear-gradient(180deg, var(--accent-flow-2), var(--accent-flow)); border-radius: 6px 6px 3px 3px; min-height: 3px; transition: height 0.4s ease; }
+  .week-bar.today { background: var(--accent-grace); }
+  .week-label { font-size: 10.5px; color: var(--muted); }
+  .week-val { font-size: 9.5px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  .import-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .file-btn { position: relative; overflow: hidden; text-align: center; }
+  .file-btn input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .import-status { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+  .theme-toggle { background: none; border: 1px solid var(--border); border-radius: 100px; width: 34px; height: 34px; flex: none; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .top-row { display: flex; gap: 8px; align-items: center; }
+
+  #mainTabs { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 54px); z-index: 4; padding: 3px; backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); }
+  #mainTabs button { padding: 11px 8px; font-size: 13.5px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: tab-in 0.25s ease; }
+  @keyframes tab-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .tab-panel.active { animation: none; } }
+
+  footer { text-align: center; font-size: 11px; color: var(--muted); padding: 6px 4px 0; line-height: 1.5; }
+
+  .device-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); font-size: 13px; }
+  .device-row:first-of-type { border-top: none; }
+  .device-val { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--muted); }
+
+  .modal-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(5,11,24,0.55); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; padding: 0; }
+  @media (min-width: 520px) { .modal-overlay { align-items: center; } }
+  .modal-card { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 22px 22px 0 0; padding: 24px 22px calc(24px + env(safe-area-inset-bottom, 0px)); width: 100%; max-width: 440px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  @media (min-width: 520px) { .modal-card { border-radius: 22px; margin-bottom: 40px; } }
+  .modal-card h3 { margin: 0 0 8px; font-size: 17px; }
+  .modal-card p { margin: 0 0 16px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .pin-input { width: 100%; text-align: center; letter-spacing: 12px; font-size: 26px; font-family: 'IBM Plex Mono', monospace; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text); margin-bottom: 10px; }
+  .pin-error { color: var(--accent-alarm); font-size: 12px; min-height: 16px; margin: -4px 0 10px; }
+  .modal-link { display: block; text-align: center; font-size: 12px; color: var(--accent-grace); background: none; border: none; margin-top: 6px; text-decoration: underline; }
+  .tut-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+  .tut-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .tut-dots span.active { background: var(--accent-flow); width: 16px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <span class="brand-mark">💧</span>
+      <div>
+        <div class="brand-name">HIDROVIGÍA MX</div>
+        <div class="brand-sub">cada litro cuenta</div>
+      </div>
+    </div>
+    <div class="top-row">
+      <div class="status-pill ok" id="statusPill">
+        <span class="status-dot"></span>
+        <span id="statusText">Normal</span>
+      </div>
+      <button class="theme-toggle" id="tutorialBtn" title="Ver tutorial" aria-label="Ver tutorial">?</button>
+      <button class="theme-toggle" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">🌗</button>
+    </div>
+  </header>
+
+  <div class="segmented" id="mainTabs" style="margin-bottom:14px;">
+    <button class="active" data-tab="monitoreo">Monitoreo</button>
+    <button data-tab="ajustes">Ajustes</button>
+  </div>
+
+  <div class="tab-panel active" id="tabMonitoreo">
+
+  <div class="hero">
+    <div class="hero-row">
+      <div>
+        <p class="hero-metric-label">Flujo actual</p>
+        <div><span class="hero-metric-value" id="flowValue">0.00</span><span class="hero-metric-unit">L/min</span></div>
+      </div>
+      <div class="hero-secondary">
+        <p class="hero-metric-label">Consumo de hoy</p>
+        <div><span class="hero-metric-value" id="volumeValue">0.0</span><span class="hero-metric-unit">L</span></div>
+        <div class="cost-line" id="costLine">≈ $0.00 MXN</div>
+      </div>
+    </div>
+
+    <span class="stage-chip hidden" id="stageChip"></span>
+
+    <div class="chart-wrap">
+      <svg class="flow-chart" id="flowChart" viewBox="0 0 300 86" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="var(--accent-flow)"/>
+            <stop offset="100%" stop-color="var(--accent-flow-2)"/>
+          </linearGradient>
+        </defs>
+        <polyline id="flowArea" fill="var(--accent-flow-soft)" stroke="none" points=""></polyline>
+        <polyline id="flowLine" fill="none" stroke="url(#flowGrad)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points=""></polyline>
+      </svg>
+      <div class="chart-caption"><span>últimos 3 min</span><span id="chartMax">máx —</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Reducción por tiempo continuo</h2>
+    <p class="hint" id="stageHint">El sistema no corta de golpe: primero reduce la presión y, si el flujo continúa, cierra por completo. Ajusta el umbral en segundos para verlo en vivo.</p>
+    <div class="stage-row">
+      <label for="stage1Slider">Reduce a 75%</label>
+      <input type="range" id="stage1Slider" min="8" max="60" step="1" value="20">
+      <span class="stage-readout" id="stage1Readout">20 s</span>
+    </div>
+    <div class="stage-row">
+      <label>Cierre total</label>
+      <input type="range" disabled style="opacity:0.35">
+      <span class="stage-readout" id="stage2Readout">30 s</span>
+    </div>
+    <div class="timeline"><div class="seg normal" id="segNormal" style="width:66%"></div><div class="seg reduced" id="segReduced" style="width:34%"></div></div>
+    <div class="marker-row"><span>0 s</span><span id="stage1Marker">etapa 1</span><span id="stage2Marker">etapa 2</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label"><span id="progressLabel">flujo continuo: 0 s</span><span id="progressPct">0%</span></div>
+  </div>
+
+  <div class="section">
+    <h2>Control de válvula</h2>
+    <p class="hint" id="valveHint">La válvula está abierta y el sistema monitorea el flujo en tiempo real.</p>
+    <div class="btn-row"><button id="simulateBtn">Simular flujo continuo</button></div>
+    <button class="hold-btn primary reset-big" id="resetBtn" disabled>
+      <span class="hold-fill" id="resetFill"></span>
+      <span>Mantén presionado para restablecer</span>
+    </button>
+    <div class="btn-row" id="graceRow" style="display:none;">
+      <button class="grace" id="graceBtn">Seguir bañándome (+extensión)</button>
+    </div>
+    <p class="grace-note" id="graceNote"></p>
+  </div>
+
+  <div class="section">
+    <h2>Historial de consumo</h2>
+    <p class="hint" id="historyHint">Los días anteriores son datos de ejemplo; hoy se actualiza con lo que veas en esta sesión.</p>
+    <div class="segmented" id="historyRange" style="margin-bottom:10px;">
+      <button class="active" data-range="week">7 días</button>
+      <button data-range="month">6 meses</button>
+      <button data-range="period">Cortes</button>
+    </div>
+    <div class="week-chart" id="weekChart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Bitácora de eventos</h2>
+    <p class="hint">Reducciones, extensiones y cierres — evidencia de uso y aceptación para el piloto.</p>
+    <div id="logList"><p class="log-empty">Todavía no se ha registrado ningún evento.</p></div>
+    <div class="btn-row" style="margin-top:12px;"><button id="exportBtn">Exportar bitácora (CSV)</button></div>
+  </div>
+
+  </div>
+
+  <div class="tab-panel" id="tabAjustes">
+
+  <div class="section">
+    <h2>Alertas</h2>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Sonido y vibración</div>
+        <div class="toggle-sub">Avisa antes de reducir y al cerrar</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="alertsToggle" checked><span class="track"></span><span class="thumb"></span></label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Tarifa y periodo de corte</h2>
+    <p class="hint">No podemos detectar tu ubicación ni consultar una tarifa en vivo desde aquí: no existe una fuente única para México (cada organismo operador publica la suya, y en algunas ciudades varía incluso por colonia). En su lugar, elige la más parecida a la tuya como punto de partida y ajusta con tu recibo.</p>
+    <div class="stage-row" style="margin-bottom:10px;">
+      <label for="citySelect">Ciudad de referencia</label>
+      <select id="citySelect" style="flex:1; padding:9px 10px; border-radius:10px; border:1px solid var(--border); background:var(--bg-2); color:var(--text); font-family:inherit; font-size:12.5px;">
+        <option value="personalizado">Personalizado (capturar a mano)</option>
+        <option value="cdmx">CDMX · SACMEX, manzana popular</option>
+        <option value="queretaro">Querétaro · zona metropolitana, apoyo social</option>
+        <option value="aguascalientes">Aguascalientes · doméstica C</option>
+        <option value="lapaz">La Paz, BCS · doméstica</option>
+      </select>
+    </div>
+    <p class="import-status" id="cityNote"></p>
+    <div class="tariff-row"><label for="periodDaysInput">Periodo de corte (días)</label><input type="number" id="periodDaysInput" min="7" max="120" step="1" value="60"></div>
+    <div class="tariff-row"><label for="baseFeeInput">Cuota fija (MXN)</label><input type="number" id="baseFeeInput" min="0" step="1" value="0"></div>
+    <div class="tariff-row"><label for="tier1LimitInput">Bloque 1 hasta (m³)</label><input type="number" id="tier1LimitInput" min="1" step="1" value="10"></div>
+    <div class="tariff-row"><label for="tier1RateInput">Tarifa bloque 1 (MXN/m³)</label><input type="number" id="tier1RateInput" min="0" step="0.5" value="8"></div>
+    <div class="tariff-row"><label for="tier2RateInput">Tarifa excedente (MXN/m³)</label><input type="number" id="tier2RateInput" min="0" step="0.5" value="22"></div>
+    <div class="progress-track"><div class="progress-fill" id="periodFill" style="animation:none;"></div></div>
+    <div class="progress-label"><span id="periodLabel">0.0 m³ este periodo</span><span id="periodDaysLeft">faltan 60 días</span></div>
+    <div class="cost-line" id="periodCost" style="margin-top:8px;">≈ $0.00 MXN estimado del periodo</div>
+    <div class="btn-row" style="margin-top:12px;"><button id="viewPeriodsBtn">Ver periodos de corte</button></div>
+  </div>
+
+  <div class="section">
+    <h2>Integraciones</h2>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Alexa / Google Home</div>
+        <div class="toggle-sub">Consultar consumo y estado por voz. El restablecimiento seguirá siendo manual, nunca por voz.</div>
+      </div>
+      <span class="soon-badge">Próximamente</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Datos reales del sensor</h2>
+    <p class="hint">Esta página no puede conectarse en vivo a un dispositivo en tu red local por seguridad del entorno. Sí puedes importar un CSV que hayas exportado del ESP32 (por ejemplo desde su tarjeta SD o monitor serie) con columnas <code>fecha,litros</code> para verlo en el historial.</p>
+    <div class="import-row">
+      <button class="file-btn">Importar CSV<input type="file" id="csvInput" accept=".csv,text/csv"></button>
+    </div>
+    <p class="import-status" id="importStatus"></p>
+  </div>
+
+  <div class="section">
+    <h2>Seguridad</h2>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Bloqueo con PIN</div>
+        <div class="toggle-sub">Pide un PIN de 4 dígitos para entrar a Ajustes</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="pinToggle"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Estado del dispositivo <span style="font-weight:400; color:var(--muted); font-size:11.5px;">· vista previa</span></h2>
+    <p class="hint">Estos datos son simulados para mostrar cómo se vería con el ESP32 real conectado. Hoy la app no tiene un enlace en vivo con el hardware.</p>
+    <div class="device-row"><span>Conexión</span><span class="device-val" id="deviceConn"><span class="status-dot" style="background:var(--accent-flow);"></span> En línea</span></div>
+    <div class="device-row"><span>Batería</span><span class="device-val" id="deviceBattery">— %</span></div>
+    <div class="device-row"><span>Señal</span><span class="device-val" id="deviceSignal">——●●●</span></div>
+    <div class="btn-row" style="margin-top:10px;"><button id="batteryResetBtn">Simular reemplazo de batería</button></div>
+  </div>
+
+  <div class="section">
+    <h2>Conexión local (ESP32)</h2>
+    <p class="hint">Sin cuentas ni nube: la app le pregunta directo al ESP32 por su estado, siempre que ambos estén en la misma red WiFi. El cierre y el restablecimiento se deciden y ejecutan siempre en el propio ESP32 — esta app solo puede leer su estado, nunca controlarlo a distancia. <strong>No funcionará mientras esta app viva dentro de Claude</strong> (el entorno bloquea salidas de red); funciona en cuanto el ESP32 sirva esta misma página directamente (ver el sketch que te dejé).</p>
+    <div class="tariff-row"><label for="deviceSelect">Dispositivo activo</label>
+      <select id="deviceSelect" style="flex:1; padding:9px 10px; border-radius:10px; border:1px solid var(--border); background:var(--bg-2); color:var(--text); font-family:inherit; font-size:12.5px;"></select>
+    </div>
+    <div class="btn-row"><button id="addDeviceBtn">+ Agregar</button><button id="editDeviceBtn">Editar</button><button id="removeDeviceBtn" class="danger">Eliminar</button></div>
+    <input type="hidden" id="localHostInput" value="hidrovigia.local">
+    <div class="toggle-row" style="margin-top:10px;">
+      <div>
+        <div class="toggle-label">Usar datos en vivo</div>
+        <div class="toggle-sub" id="localStatus">Simulado</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="localToggle"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Calibración remota de válvula</h2>
+    <p class="hint">Mueve la válvula real desde el celular, con el mismo límite que la calibración física: <strong>se bloquea si la válvula está cerrada por un evento de seguridad</strong>, para que nadie la reabra a control remoto sin revisar la instalación. Requiere el PIN del dispositivo (distinto al PIN de esta app) y estar en la misma red WiFi.</p>
+    <div class="tariff-row"><label for="calibPinInput">PIN del dispositivo</label><input type="password" id="calibPinInput" style="width:110px;"></div>
+    <p class="import-status" id="calibMsg"></p>
+    <div id="calibControls" style="display:none;">
+      <div class="stage-chip" id="calibPosChip" style="background:var(--accent-grace-soft); color:var(--accent-grace);"></div>
+      <div class="hero-row" style="justify-content:center; margin:10px 0;">
+        <span class="hero-metric-value" id="calibAngle" style="font-size:32px;">—</span><span class="hero-metric-unit">°</span>
+      </div>
+      <div class="btn-row">
+        <button id="calibMinus">-5°</button>
+        <button id="calibPlus">+5°</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button id="calibNext">Siguiente posición</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button id="calibCancel" class="danger">Cancelar</button>
+        <button id="calibSave" class="primary">Guardar</button>
+      </div>
+    </div>
+    <div class="btn-row" id="calibEnterRow" style="margin-top:10px;">
+      <button id="calibEnter">Entrar a calibración</button>
+    </div>
+  </div>
+
+  </div>
+
+  <footer>
+    Datos simulados con fines de demostración para HIDROVIGÍA MX.<br>
+    Diseñado para sustituirse por telemetría real del ESP32 + YF-S201.
+  </footer>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay" style="display:none;">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "hidrovigia_state_v4";
+  // Un solo perfil por instalación: en un despliegue real, este umbral se fija una
+  // vez al instalar el dispositivo en ese punto de la casa (regadera, cocina, etc.),
+  // no se elige a diario, así que la app ya no ofrece un selector de modo.
+  var PROFILE = { stage1: 20, min: 10, max: 60, allowGrace: true,
+    hint: "El sistema no corta de golpe: primero reduce la presión y, si el flujo continúa, cierra por completo. Puedes extender la sesión una vez que entra en reducción." };
+  var STAGE_RATIO = 1.5;
+
+  var state = {
+    stage1Seconds: PROFILE.stage1,
+    log: [],
+    theme: null,
+    alertsEnabled: true,
+    periodDays: 60,
+    baseFee: 0,
+    tier1Limit: 10,
+    tier1Rate: 8,
+    tier2Rate: 22,
+    periodStart: null,
+    periodVolume: 0,
+    periodHistory: null,
+    dailyHistory: null,
+    todayVolume: 0,
+    todayKey: null,
+    monthlyHistory: null,
+    monthKey: null,
+    monthVolume: 0,
+    pinEnabled: false,
+    pin: null,
+    tutorialSeen: false,
+    localHost: "hidrovigia.local",
+    devices: null,
+    activeDeviceIndex: 0
+  };
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      var p = JSON.parse(saved);
+      if (p && typeof p === "object") {
+        state.stage1Seconds = p.stage1Seconds || PROFILE.stage1;
+        state.log = Array.isArray(p.log) ? p.log : [];
+        state.theme = p.theme || null;
+        state.alertsEnabled = p.alertsEnabled !== false;
+        state.periodDays = typeof p.periodDays === "number" ? p.periodDays : 60;
+        state.baseFee = typeof p.baseFee === "number" ? p.baseFee : 0;
+        state.tier1Limit = typeof p.tier1Limit === "number" ? p.tier1Limit : 10;
+        state.tier1Rate = typeof p.tier1Rate === "number" ? p.tier1Rate : 8;
+        state.tier2Rate = typeof p.tier2Rate === "number" ? p.tier2Rate : 22;
+        state.periodStart = p.periodStart || null;
+        state.periodVolume = typeof p.periodVolume === "number" ? p.periodVolume : 0;
+        state.periodHistory = Array.isArray(p.periodHistory) ? p.periodHistory : null;
+        state.dailyHistory = Array.isArray(p.dailyHistory) ? p.dailyHistory : null;
+        state.todayKey = p.todayKey || null;
+        state.monthlyHistory = Array.isArray(p.monthlyHistory) ? p.monthlyHistory : null;
+        state.monthKey = p.monthKey || null;
+        state.monthVolume = typeof p.monthVolume === "number" ? p.monthVolume : 0;
+        state.pinEnabled = !!p.pinEnabled;
+        state.pin = p.pin || null;
+        state.tutorialSeen = !!p.tutorialSeen;
+        state.localHost = p.localHost || "hidrovigia.local";
+        state.devices = Array.isArray(p.devices) ? p.devices : null;
+        state.activeDeviceIndex = typeof p.activeDeviceIndex === "number" ? p.activeDeviceIndex : 0;
+      }
+    }
+  } catch (e) {}
+
+  function persist() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+  if (state.theme === "dark" || state.theme === "light") document.documentElement.setAttribute("data-theme", state.theme);
+
+  function todayKey() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
+  function parseDateKey(key) { var p = key.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  function fmtShort(d) { return d.toLocaleDateString("es-MX", { day: "2-digit", month: "short" }); }
+  if (!state.periodStart) { state.periodStart = todayKey(); persist(); }
+  if (!state.periodHistory) {
+    state.periodHistory = [];
+    var seedBase = parseDateKey(state.periodStart);
+    for (var sp = 3; sp >= 1; sp--) {
+      var pEnd = new Date(seedBase); pEnd.setDate(pEnd.getDate() - 1 - (sp - 1) * state.periodDays);
+      var pStart = new Date(pEnd); pStart.setDate(pStart.getDate() - state.periodDays + 1);
+      var vol = Math.round(state.periodDays * (120 + Math.random() * 180));
+      state.periodHistory.push({ start: fmtShort(pStart), end: fmtShort(pEnd), volume: vol, cost: (state.baseFee || 0) + Math.min(vol / 1000, state.tier1Limit) * state.tier1Rate + Math.max(0, vol / 1000 - state.tier1Limit) * state.tier2Rate });
+    }
+    persist();
+  }
+  function checkPeriodRollover() {
+    var startDate = parseDateKey(state.periodStart);
+    var elapsedDays = Math.floor((Date.now() - startDate.getTime()) / 86400000);
+    if (elapsedDays >= state.periodDays) {
+      var closeDate = new Date(startDate); closeDate.setDate(closeDate.getDate() + state.periodDays - 1);
+      state.periodHistory.push({ start: fmtShort(startDate), end: fmtShort(closeDate), volume: Math.round(state.periodVolume), cost: tieredCost(state.periodVolume) });
+      while (state.periodHistory.length > 8) state.periodHistory.shift();
+      state.periodStart = todayKey();
+      state.periodVolume = 0;
+      persist();
+      return true;
+    }
+    return false;
+  }
+  checkPeriodRollover();
+  function tieredCost(volumeLiters) {
+    var m3 = volumeLiters / 1000;
+    var cost = state.baseFee;
+    if (m3 <= state.tier1Limit) cost += m3 * state.tier1Rate;
+    else cost += state.tier1Limit * state.tier1Rate + (m3 - state.tier1Limit) * state.tier2Rate;
+    return cost;
+  }
+  function daysLeftInPeriod() {
+    var startDate = parseDateKey(state.periodStart);
+    var elapsedDays = Math.floor((Date.now() - startDate.getTime()) / 86400000);
+    return Math.max(0, state.periodDays - elapsedDays);
+  }
+  function dayLabel(offset) {
+    var names = ["dom","lun","mar","mié","jue","vie","sáb"];
+    var d = new Date(); d.setDate(d.getDate() + offset);
+    return names[d.getDay()];
+  }
+  if (!state.dailyHistory) {
+    state.dailyHistory = [];
+    for (var k = 6; k >= 1; k--) {
+      state.dailyHistory.push({ label: dayLabel(-k), volume: Math.round(90 + Math.random() * 140) });
+    }
+  }
+  if (state.todayKey !== todayKey()) {
+    if (state.todayKey) state.dailyHistory.push({ label: dayLabel(-1), volume: Math.round(state.todayVolume) });
+    while (state.dailyHistory.length > 6) state.dailyHistory.shift();
+    state.todayKey = todayKey();
+    state.todayVolume = 0;
+    persist();
+  }
+
+  function monthKey() { var d = new Date(); return d.getFullYear() + "-" + d.getMonth(); }
+  function monthLabel(offset) {
+    var names = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    var d = new Date(); d.setMonth(d.getMonth() + offset);
+    return names[d.getMonth()];
+  }
+  if (!state.monthlyHistory) {
+    state.monthlyHistory = [];
+    for (var mk = 5; mk >= 1; mk--) {
+      state.monthlyHistory.push({ label: monthLabel(-mk), volume: Math.round(2600 + Math.random() * 2200) });
+    }
+  }
+  if (state.monthKey !== monthKey()) {
+    if (state.monthKey) state.monthlyHistory.push({ label: monthLabel(-1), volume: Math.round(state.monthVolume) });
+    while (state.monthlyHistory.length > 6) state.monthlyHistory.shift();
+    state.monthKey = monthKey();
+    state.monthVolume = 0;
+    persist();
+  }
+
+  // ---------- elements ----------
+  var flowValueEl = document.getElementById("flowValue");
+  var volumeValueEl = document.getElementById("volumeValue");
+  var costLine = document.getElementById("costLine");
+  var statusPill = document.getElementById("statusPill");
+  var statusText = document.getElementById("statusText");
+  var stage1Slider = document.getElementById("stage1Slider");
+  var stage1Readout = document.getElementById("stage1Readout");
+  var stage2Readout = document.getElementById("stage2Readout");
+  var segNormal = document.getElementById("segNormal");
+  var segReduced = document.getElementById("segReduced");
+  var stage1Marker = document.getElementById("stage1Marker");
+  var stage2Marker = document.getElementById("stage2Marker");
+  var stageHint = document.getElementById("stageHint");
+  var progressFill = document.getElementById("progressFill");
+  var progressLabel = document.getElementById("progressLabel");
+  var progressPct = document.getElementById("progressPct");
+  var simulateBtn = document.getElementById("simulateBtn");
+  var resetBtn = document.getElementById("resetBtn");
+  var resetFill = document.getElementById("resetFill");
+  var valveHint = document.getElementById("valveHint");
+  var logList = document.getElementById("logList");
+  var flowLine = document.getElementById("flowLine");
+  var flowArea = document.getElementById("flowArea");
+  var chartMax = document.getElementById("chartMax");
+  var themeToggle = document.getElementById("themeToggle");
+  var stageChip = document.getElementById("stageChip");
+  var graceRow = document.getElementById("graceRow");
+  var graceBtn = document.getElementById("graceBtn");
+  var graceNote = document.getElementById("graceNote");
+  var alertsToggle = document.getElementById("alertsToggle");
+  var periodDaysInput = document.getElementById("periodDaysInput");
+  var baseFeeInput = document.getElementById("baseFeeInput");
+  var tier1LimitInput = document.getElementById("tier1LimitInput");
+  var tier1RateInput = document.getElementById("tier1RateInput");
+  var tier2RateInput = document.getElementById("tier2RateInput");
+  var periodFill = document.getElementById("periodFill");
+  var periodLabel = document.getElementById("periodLabel");
+  var periodDaysLeft = document.getElementById("periodDaysLeft");
+  var periodCost = document.getElementById("periodCost");
+  var weekChart = document.getElementById("weekChart");
+  var exportBtn = document.getElementById("exportBtn");
+  var csvInput = document.getElementById("csvInput");
+  var importStatus = document.getElementById("importStatus");
+  var viewPeriodsBtn = document.getElementById("viewPeriodsBtn");
+  viewPeriodsBtn.addEventListener("click", function () {
+    var currentRow = '<div class="log-item"><div><div class="log-date">Periodo actual (en curso)</div>' +
+      '<div class="log-meta">' + (state.periodVolume / 1000).toFixed(2) + ' m³ · faltan ' + daysLeftInPeriod() + ' días</div></div>' +
+      '<div class="log-vol grace">$' + tieredCost(state.periodVolume).toFixed(2) + '</div></div>';
+    var rows = state.periodHistory.slice().reverse().map(function (p) {
+      return '<div class="log-item"><div><div class="log-date">' + p.start + ' – ' + p.end + '</div>' +
+        '<div class="log-meta">' + (p.volume / 1000).toFixed(2) + ' m³</div></div>' +
+        '<div class="log-vol">$' + p.cost.toFixed(2) + '</div></div>';
+    }).join("");
+    var html = '<h3>Periodos de corte</h3><p>Volumen y costo estimado de cada corte, más el periodo en curso.</p>' +
+      '<div style="max-height:52vh; overflow-y:auto;">' + currentRow + rows + '</div>' +
+      '<div class="btn-row" style="margin-top:14px;"><button class="primary" id="periodsClose">Cerrar</button></div>';
+    openModal(html);
+    document.getElementById("periodsClose").addEventListener("click", closeModal);
+  });
+  var historyRange = document.getElementById("historyRange");
+  var historyHint = document.getElementById("historyHint");
+  var tutorialBtn = document.getElementById("tutorialBtn");
+  var pinToggle = document.getElementById("pinToggle");
+  var deviceBattery = document.getElementById("deviceBattery");
+  var deviceSignal = document.getElementById("deviceSignal");
+  var batteryResetBtn = document.getElementById("batteryResetBtn");
+  var modalOverlay = document.getElementById("modalOverlay");
+  var modalCard = document.getElementById("modalCard");
+
+  function openModal(html) { modalCard.innerHTML = html; modalOverlay.style.display = "flex"; }
+  function closeModal() { modalOverlay.style.display = "none"; modalCard.innerHTML = ""; }
+  modalOverlay.addEventListener("click", function (e) { if (e.target === modalOverlay) closeModal(); });
+
+  var mainTabs = document.getElementById("mainTabs");
+  var tabMonitoreo = document.getElementById("tabMonitoreo");
+  var tabAjustes = document.getElementById("tabAjustes");
+  var sessionUnlocked = false;
+
+  function activateTab(tab) {
+    mainTabs.querySelectorAll("button").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-tab") === tab); });
+    tabMonitoreo.classList.toggle("active", tab === "monitoreo");
+    tabAjustes.classList.toggle("active", tab === "ajustes");
+  }
+
+  function askPin(onSuccess) {
+    var html =
+      '<h3>Ingresa tu PIN</h3>' +
+      '<p>Escribe el PIN de 4 dígitos para entrar a Ajustes.</p>' +
+      '<input class="pin-input" id="pinEntry" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">' +
+      '<div class="pin-error" id="pinError"></div>' +
+      '<div class="btn-row"><button id="pinCancel">Cancelar</button><button class="primary" id="pinSubmit">Desbloquear</button></div>' +
+      '<button class="modal-link" id="pinForgot">Olvidé mi PIN (desactivar bloqueo)</button>';
+    openModal(html);
+    var entry = document.getElementById("pinEntry");
+    entry.focus();
+    document.getElementById("pinCancel").addEventListener("click", closeModal);
+    document.getElementById("pinForgot").addEventListener("click", function () {
+      state.pinEnabled = false; state.pin = null; pinToggle.checked = false;
+      persist(); closeModal(); onSuccess();
+    });
+    function trySubmit() {
+      if (entry.value === state.pin) { closeModal(); onSuccess(); }
+      else { document.getElementById("pinError").textContent = "PIN incorrecto, intenta de nuevo."; entry.value = ""; entry.focus(); }
+    }
+    document.getElementById("pinSubmit").addEventListener("click", trySubmit);
+    entry.addEventListener("keydown", function (e) { if (e.key === "Enter") trySubmit(); });
+  }
+
+  function createPin(onDone) {
+    var html =
+      '<h3>Crea un PIN</h3>' +
+      '<p>Se pedirá para entrar a Ajustes. Elige 4 dígitos.</p>' +
+      '<input class="pin-input" id="pinNew" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">' +
+      '<div class="pin-error" id="pinNewError"></div>' +
+      '<div class="btn-row"><button id="pinNewCancel">Cancelar</button><button class="primary" id="pinNewSave">Guardar PIN</button></div>';
+    openModal(html);
+    var entry = document.getElementById("pinNew");
+    entry.focus();
+    document.getElementById("pinNewCancel").addEventListener("click", function () { closeModal(); onDone(false); });
+    document.getElementById("pinNewSave").addEventListener("click", function () {
+      if (!/^\d{4}$/.test(entry.value)) { document.getElementById("pinNewError").textContent = "Escribe exactamente 4 dígitos."; return; }
+      state.pin = entry.value; state.pinEnabled = true; persist(); closeModal(); onDone(true);
+    });
+  }
+
+  mainTabs.addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-tab]");
+    if (!btn) return;
+    var tab = btn.getAttribute("data-tab");
+    if (tab === "ajustes" && state.pinEnabled && !sessionUnlocked) {
+      askPin(function () { sessionUnlocked = true; activateTab("ajustes"); });
+      return;
+    }
+    activateTab(tab);
+  });
+
+  pinToggle.checked = state.pinEnabled;
+  pinToggle.addEventListener("change", function () {
+    if (pinToggle.checked) {
+      createPin(function (saved) { if (!saved) pinToggle.checked = false; else sessionUnlocked = true; });
+    } else {
+      state.pinEnabled = false; persist();
+    }
+  });
+
+  alertsToggle.checked = state.alertsEnabled;
+  var TARIFF_PRESETS = {
+    cdmx: { periodDays: 60, baseFee: 0, tier1Limit: 15, tier1Rate: 2.73, tier2Rate: 1.15,
+      note: "Aproximado a partir de ejemplos públicos (manzana popular, ≈2020-2022). SACMEX tiene 4 clasificaciones por colonia (popular/baja/media/alta, hasta 4× de diferencia) y la tarifa sube más después de 120 m³/bimestre. Verifica tu clasificación real en tu recibo." },
+    queretaro: { periodDays: 30, baseFee: 29.5, tier1Limit: 10, tier1Rate: 4.16, tier2Rate: 13.18,
+      note: "Estimado a partir del tarifario público 2023 (apoyo social, zona metropolitana), simplificado a dos bloques a partir de su tabla real de más de 200 escalones." },
+    aguascalientes: { periodDays: 30, baseFee: 50, tier1Limit: 10, tier1Rate: 20, tier2Rate: 33.9,
+      note: "Estimado a partir de un comparativo público de tarifas 2023 (doméstica C), simplificado a dos bloques." },
+    lapaz: { periodDays: 30, baseFee: 30, tier1Limit: 10, tier1Rate: 8, tier2Rate: 14.7,
+      note: "Estimado a partir de un comparativo público de tarifas 2022, simplificado a dos bloques." }
+  };
+  var citySelect = document.getElementById("citySelect");
+  var cityNote = document.getElementById("cityNote");
+  citySelect.addEventListener("change", function () {
+    var preset = TARIFF_PRESETS[citySelect.value];
+    if (!preset) { cityNote.textContent = ""; return; }
+    state.periodDays = preset.periodDays; state.baseFee = preset.baseFee;
+    state.tier1Limit = preset.tier1Limit; state.tier1Rate = preset.tier1Rate; state.tier2Rate = preset.tier2Rate;
+    periodDaysInput.value = preset.periodDays; baseFeeInput.value = preset.baseFee;
+    tier1LimitInput.value = preset.tier1Limit; tier1RateInput.value = preset.tier1Rate; tier2RateInput.value = preset.tier2Rate;
+    cityNote.textContent = preset.note;
+    persist();
+    if (checkPeriodRollover()) renderHistory();
+    renderPeriod();
+  });
+  baseFeeInput.value = state.baseFee;
+  tier1LimitInput.value = state.tier1Limit;
+  tier1RateInput.value = state.tier1Rate;
+  tier2RateInput.value = state.tier2Rate;
+
+  function renderPeriod() {
+    var pct = Math.min(100, (state.periodVolume / 1000 / Math.max(1, state.tier1Limit * 1.6)) * 100);
+    periodFill.style.width = pct + "%";
+    periodFill.className = "progress-fill" + (pct >= 90 ? " warn" : "");
+    periodLabel.textContent = (state.periodVolume / 1000).toFixed(2) + " m³ este periodo";
+    var dleft = daysLeftInPeriod();
+    periodDaysLeft.textContent = dleft === 1 ? "falta 1 día" : "faltan " + dleft + " días";
+    periodCost.textContent = "≈ $" + tieredCost(state.periodVolume).toFixed(2) + " MXN estimado del periodo";
+  }
+  renderPeriod();
+
+  function getStage1() { return state.stage1Seconds; }
+  function getStage2() { return Math.round(state.stage1Seconds * STAGE_RATIO); }
+
+  function refreshStageUI() {
+    stage1Slider.min = PROFILE.min; stage1Slider.max = PROFILE.max;
+    var s1 = getStage1(), s2 = getStage2();
+    stage1Slider.value = s1;
+    stage1Readout.textContent = s1 + " s";
+    stage2Readout.textContent = s2 + " s (auto)";
+    var pctNormal = (s1 / s2) * 100;
+    segNormal.style.width = pctNormal + "%";
+    segReduced.style.width = (100 - pctNormal) + "%";
+    stage1Marker.textContent = "etapa 1 · " + s1 + "s";
+    stage2Marker.textContent = "etapa 2 · " + s2 + "s";
+    stageHint.textContent = PROFILE.hint;
+  }
+  refreshStageUI();
+
+  var historyMode = "week";
+  function renderHistory() {
+    var days;
+    if (historyMode === "week") {
+      days = state.dailyHistory.concat([{ label: "hoy", volume: state.todayVolume, today: true }]);
+      historyHint.textContent = "Los días anteriores son datos de ejemplo; hoy se actualiza con lo que veas en esta sesión.";
+    } else if (historyMode === "month") {
+      days = state.monthlyHistory.concat([{ label: "este mes", volume: state.monthVolume, today: true }]);
+      historyHint.textContent = "Los meses anteriores son datos de ejemplo; el mes actual se actualiza con lo que veas en esta sesión.";
+    } else {
+      days = state.periodHistory.map(function (p) { return { label: p.end, volume: p.volume }; }).concat([{ label: "actual", volume: state.periodVolume, today: true }]);
+      historyHint.textContent = "Cada barra es un periodo de corte completo (según los días configurados en Ajustes); \"actual\" es el que está en curso.";
+    }
+    var max = 10;
+    days.forEach(function (d) { if (d.volume > max) max = d.volume; });
+    var html = "";
+    days.forEach(function (d) {
+      var h = Math.max(3, Math.round((d.volume / max) * 74));
+      html += '<div class="week-bar-wrap">' +
+        '<div class="week-val">' + Math.round(d.volume) + '</div>' +
+        '<div class="week-bar-track"><div class="week-bar' + (d.today ? ' today' : '') + '" style="height:' + h + 'px"></div></div>' +
+        '<div class="week-label">' + d.label + '</div></div>';
+    });
+    weekChart.innerHTML = html;
+  }
+  renderHistory();
+  historyRange.addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-range]");
+    if (!btn) return;
+    historyMode = btn.getAttribute("data-range");
+    historyRange.querySelectorAll("button").forEach(function (b) { b.classList.toggle("active", b === btn); });
+    renderHistory();
+  });
+
+  // ---------- audio / vibration ----------
+  var audioCtx = null;
+  function ensureAudio() {
+    if (!state.alertsEnabled) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) {}
+  }
+  function beep(freq, ms) {
+    if (!state.alertsEnabled) return;
+    try {
+      ensureAudio();
+      if (!audioCtx) return;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.frequency.value = freq;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + ms / 1000);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + ms / 1000);
+    } catch (e) {}
+  }
+  function vibrate(pattern) {
+    if (!state.alertsEnabled) return;
+    try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+  }
+  function alertPreWarning() { beep(660, 160); vibrate(120); }
+  function alertReduced() { beep(520, 220); vibrate([100, 60, 100]); }
+  function alertClosed() { beep(300, 380); vibrate([200, 80, 200, 80, 200]); }
+
+  // ---------- simulation state ----------
+  var valveOpen = true;
+  var continuousSeconds = 0;
+  var volumeToday = 0;
+  var alarmActive = false;
+  var forcedLeak = false;
+  var currentStage = 0;
+  var graceUsed = 0;
+  var preWarned = false;
+  var history = [];
+  var HISTORY_LEN = 90;
+
+  volumeToday = state.todayVolume || 0;
+  volumeValueEl.textContent = volumeToday.toFixed(1);
+
+  function randomBaselineFlow() {
+    var r = Math.random();
+    if (r < 0.72) return 0;
+    if (r < 0.92) return +(Math.random() * 1.2).toFixed(2);
+    return +(1.2 + Math.random() * 2.5).toFixed(2);
+  }
+  function fmt(n, d) { return n.toFixed(d === undefined ? 2 : d); }
+
+  function renderLog() {
+    if (state.log.length === 0) { logList.innerHTML = '<p class="log-empty">Todavía no se ha registrado ningún evento.</p>'; return; }
+    var html = "";
+    for (var i = state.log.length - 1; i >= 0; i--) {
+      var e = state.log[i];
+      html += '<div class="log-item"><div><div class="log-date">' + e.label + '</div>' +
+        '<div class="log-meta">' + e.date + '</div></div>' +
+        '<div class="log-vol ' + e.kind + '">' + e.volume + ' L</div></div>';
+    }
+    logList.innerHTML = html;
+  }
+  renderLog();
+
+  function logEvent(label, kind) {
+    var now = new Date();
+    var dateStr = now.toLocaleDateString("es-MX", { day: "2-digit", month: "short" }) + " · " + now.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+    state.log.push({ label: label, date: dateStr, volume: fmt(volumeToday, 1), kind: kind });
+    persist(); renderLog();
+  }
+
+  function setStatus(kind, label) { statusPill.className = "status-pill " + kind; statusText.textContent = label; }
+
+  function updateChart() {
+    var w = 300, h = 86, max = 4;
+    for (var i = 0; i < history.length; i++) if (history[i] > max) max = history[i];
+    max = Math.ceil(max * 1.15 * 10) / 10;
+    chartMax.textContent = "máx " + fmt(max, 1) + " L/min";
+    var n = history.length, pts = [];
+    for (var j = 0; j < n; j++) {
+      var x = n <= 1 ? w : (j / (HISTORY_LEN - 1)) * w;
+      var y = h - (history[j] / max) * h;
+      pts.push(x.toFixed(1) + "," + y.toFixed(1));
+    }
+    flowLine.setAttribute("points", pts.join(" "));
+    if (n > 0) {
+      var areaPts = pts.slice();
+      var lastX = (n <= 1 ? w : ((n - 1) / (HISTORY_LEN - 1)) * w).toFixed(1);
+      var firstX = pts[0].split(",")[0];
+      areaPts.push(lastX + "," + h); areaPts.push(firstX + "," + h);
+      flowArea.setAttribute("points", areaPts.join(" "));
+    }
+  }
+
+  function showStageChip() {
+    if (currentStage === 0) stageChip.className = "stage-chip hidden";
+    else if (currentStage === 1) { stageChip.className = "stage-chip reduced"; stageChip.textContent = "Reducido a 75%"; }
+    else { stageChip.className = "stage-chip closed"; stageChip.textContent = "Cerrado"; }
+  }
+
+  function updateGraceUI() {
+    if (currentStage === 1 && graceUsed < 2) {
+      graceRow.style.display = "flex";
+      graceNote.textContent = "Extensión disponible: " + (2 - graceUsed) + " de 2 en esta sesión. Cada uso queda registrado.";
+    } else if (currentStage === 1) {
+      graceRow.style.display = "none";
+      graceNote.textContent = "Ya usaste tus extensiones disponibles para esta sesión continua.";
+    } else {
+      graceRow.style.display = "none";
+      graceNote.textContent = "";
+    }
+  }
+
+  graceBtn.addEventListener("click", function () {
+    ensureAudio();
+    if (currentStage !== 1 || graceUsed >= 2) return;
+    graceUsed += 1;
+    currentStage = 0;
+    continuousSeconds = Math.max(0, Math.round(getStage1() * 0.35));
+    showStageChip(); updateGraceUI();
+    setStatus("ok", "Normal (extensión activa)");
+    logEvent("Extensión otorgada", "grace");
+  });
+
+  function triggerStage2() {
+    valveOpen = false; alarmActive = true; forcedLeak = false; currentStage = 2;
+    showStageChip(); updateGraceUI();
+    setStatus("alarm", "Cierre preventivo activo");
+    valveHint.textContent = "La válvula se cerró por completo tras flujo continuo prolongado. Verifica la instalación antes de restablecer.";
+    simulateBtn.disabled = true; resetBtn.disabled = false;
+    logEvent("Cierre total", "closed");
+    alertClosed();
+  }
+
+  function doReset() {
+    valveOpen = true; alarmActive = false; continuousSeconds = 0; currentStage = 0; graceUsed = 0; preWarned = false;
+    simulateBtn.disabled = false; resetBtn.disabled = true;
+    valveHint.textContent = "La válvula está abierta y el sistema monitorea el flujo en tiempo real.";
+    setStatus("ok", "Normal");
+    showStageChip(); updateGraceUI();
+  }
+
+  var holdTimer = null, holdStart = null, HOLD_MS = 1400;
+  function startHold() {
+    ensureAudio();
+    if (resetBtn.disabled) return;
+    holdStart = Date.now();
+    holdTimer = setInterval(function () {
+      var pct = Math.min(100, ((Date.now() - holdStart) / HOLD_MS) * 100);
+      resetFill.style.width = pct + "%";
+      if (pct >= 100) { clearInterval(holdTimer); resetFill.style.width = "0%"; doReset(); }
+    }, 30);
+  }
+  function cancelHold() { clearInterval(holdTimer); resetFill.style.width = "0%"; }
+  resetBtn.addEventListener("mousedown", startHold);
+  resetBtn.addEventListener("touchstart", function (e) { e.preventDefault(); startHold(); }, { passive: false });
+  ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach(function (evt) { resetBtn.addEventListener(evt, cancelHold); });
+
+  simulateBtn.addEventListener("click", function () {
+    ensureAudio();
+    forcedLeak = !forcedLeak;
+    simulateBtn.textContent = forcedLeak ? "Detener simulación" : "Simular flujo continuo";
+    simulateBtn.classList.toggle("danger", forcedLeak);
+  });
+
+  stage1Slider.addEventListener("input", function () {
+    state.stage1Seconds = parseInt(stage1Slider.value, 10);
+    refreshStageUI(); persist();
+  });
+
+  alertsToggle.addEventListener("change", function () {
+    state.alertsEnabled = alertsToggle.checked;
+    if (state.alertsEnabled) ensureAudio();
+    persist();
+  });
+
+  [ [periodDaysInput, "periodDays"], [baseFeeInput, "baseFee"], [tier1LimitInput, "tier1Limit"], [tier1RateInput, "tier1Rate"], [tier2RateInput, "tier2Rate"] ].forEach(function (pair) {
+    pair[0].addEventListener("input", function () {
+      var v = parseFloat(pair[0].value);
+      state[pair[1]] = isNaN(v) ? 0 : v;
+      persist();
+      if (pair[1] === "periodDays" && !isNaN(v) && v > 0) {
+        if (checkPeriodRollover()) renderHistory();
+      }
+      renderPeriod();
+    });
+  });
+
+  themeToggle.addEventListener("click", function () {
+    var current = document.documentElement.getAttribute("data-theme");
+    var next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    state.theme = next; persist();
+  });
+
+  exportBtn.addEventListener("click", async function () {
+    var rows = [["fecha_hora", "evento", "volumen_L"]];
+    state.log.forEach(function (e) { rows.push([e.date, e.label, e.volume]); });
+    var csv = rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","); }).join("\n");
+    try {
+      var downloads = await claude.use("downloads");
+      if (!downloads) { importStatus.textContent = "La descarga no está disponible en esta vista."; return; }
+      await downloads.save({ filename: "hidrovigia_bitacora.csv", data: csv });
+    } catch (err) {
+      importStatus.textContent = "No se pudo exportar (" + (err && err.code ? err.code : "error") + ").";
+    }
+  });
+
+  csvInput.addEventListener("change", function () {
+    var file = csvInput.files && csvInput.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var text = String(reader.result || "");
+        var lines = text.split(/\r?\n/).filter(function (l) { return l.trim().length; });
+        var parsedDays = [];
+        lines.forEach(function (line, idx) {
+          if (idx === 0 && /[a-zA-Z]/.test(line.split(",")[1] || "")) return; // skip header row
+          var parts = line.split(",");
+          if (parts.length < 2) return;
+          var vol = parseFloat(parts[1]);
+          if (!isNaN(vol)) parsedDays.push({ label: (parts[0] || "").slice(5, 10) || "día", volume: vol });
+        });
+        if (parsedDays.length === 0) {
+          importStatus.textContent = "No se encontraron filas válidas (se esperan columnas fecha,litros).";
+          return;
+        }
+        state.dailyHistory = parsedDays.slice(-6);
+        persist(); renderHistory();
+        importStatus.textContent = "Se importaron " + parsedDays.length + " lecturas reales al historial.";
+      } catch (e) {
+        importStatus.textContent = "No se pudo leer el archivo como CSV.";
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  function tick() {
+    var isLive = localToggle.checked && liveTelemetry && (Date.now() - lastLiveTs < 10000);
+
+    if (isLive) {
+      // El ESP32 es la fuente de verdad: reflejamos su telemetría en vez de simular.
+      var flowLive = +(liveTelemetry.flow_lpm || 0).toFixed(2);
+      valveOpen = liveTelemetry.valve !== "closed";
+      currentStage = typeof liveTelemetry.stage === "number" ? liveTelemetry.stage : currentStage;
+      continuousSeconds = liveTelemetry.continuous_s || 0;
+      volumeToday = liveTelemetry.volume_today_l != null ? liveTelemetry.volume_today_l : volumeToday;
+      state.todayVolume = volumeToday;
+      state.periodVolume += flowLive / 60;
+      state.monthVolume += flowLive / 60;
+      history.push(flowLive);
+      if (history.length > HISTORY_LEN) history.shift();
+      flowValueEl.textContent = fmt(flowLive, 2);
+      volumeValueEl.textContent = fmt(volumeToday, 1);
+      costLine.textContent = "≈ $" + tieredCost(state.periodVolume).toFixed(2) + " MXN acumulado del periodo";
+      renderPeriod();
+      updateChart();
+      showStageChip(); updateGraceUI();
+      resetBtn.disabled = true;
+      simulateBtn.disabled = true;
+      valveHint.textContent = currentStage === 2
+        ? "La válvula está cerrada según el ESP32. Restablécela físicamente en el dispositivo — esta app no puede reabrirla de forma remota, por diseño."
+        : "Mostrando el estado real reportado por el ESP32.";
+      if (currentStage === 2) setStatus("alarm", "Cierre preventivo activo (en vivo)");
+      else if (currentStage === 1) setStatus("warn", "Reducido a 75% (en vivo)");
+      else setStatus("ok", "Normal (en vivo)");
+      if (Math.random() < 0.02) { checkPeriodRollover(); persist(); renderHistory(); }
+      return;
+    }
+
+    var multiplier = currentStage === 1 ? 0.75 : (currentStage === 2 ? 0 : 1);
+    var flow;
+    if (!valveOpen) flow = 0;
+    else if (forcedLeak) flow = +((2.4 + Math.random() * 0.6) * multiplier).toFixed(2);
+    else flow = +(randomBaselineFlow() * multiplier).toFixed(2);
+
+    volumeToday += flow / 60;
+    state.todayVolume = volumeToday;
+    state.periodVolume += flow / 60;
+    state.monthVolume += flow / 60;
+    history.push(flow);
+    if (history.length > HISTORY_LEN) history.shift();
+    flowValueEl.textContent = fmt(flow, 2);
+    volumeValueEl.textContent = fmt(volumeToday, 1);
+    costLine.textContent = "≈ $" + tieredCost(state.periodVolume).toFixed(2) + " MXN acumulado del periodo";
+    renderPeriod();
+    updateChart();
+
+    if (valveOpen) {
+      if (flow > 0.15 || (multiplier > 0 && forcedLeak)) continuousSeconds += 1;
+      else {
+        continuousSeconds = 0; preWarned = false;
+        if (currentStage !== 0) { currentStage = 0; graceUsed = 0; showStageChip(); updateGraceUI(); setStatus("ok", "Normal"); }
+      }
+
+      var s1 = getStage1(), s2 = getStage2();
+      var pct = Math.min(100, (continuousSeconds / s2) * 100);
+      progressFill.style.width = pct + "%";
+      progressLabel.textContent = "flujo continuo: " + continuousSeconds + " s";
+      progressPct.textContent = Math.round(pct) + "%";
+
+      if (!preWarned && currentStage === 0 && continuousSeconds >= Math.round(s1 * 0.7)) {
+        preWarned = true; alertPreWarning();
+      }
+
+      if (continuousSeconds >= s2) { progressFill.className = "progress-fill alarm"; triggerStage2(); }
+      else if (continuousSeconds >= s1) {
+        progressFill.className = "progress-fill warn";
+        if (currentStage !== 1) { currentStage = 1; showStageChip(); updateGraceUI(); setStatus("warn", "Reducido a 75% por tiempo continuo"); alertReduced(); }
+      } else {
+        progressFill.className = "progress-fill";
+        if (currentStage !== 0 && !alarmActive) { currentStage = 0; showStageChip(); updateGraceUI(); }
+        if (!alarmActive) setStatus("ok", "Normal");
+      }
+    }
+    if (Math.random() < 0.02) {
+      if (checkPeriodRollover()) renderPeriod();
+      persist(); renderHistory();
+    }
+  }
+
+  // ---------- tutorial ----------
+  var TUTORIAL_SLIDES = [
+    { title: "Monitoreo en vivo", body: "Aquí ves el flujo actual, el consumo del día y una gráfica de los últimos minutos, como si vieras el medidor en tiempo real." },
+    { title: "Reducción antes del cierre", body: "Si el flujo sigue sin interrupción, primero baja a 75% de presión y avisa. Solo si continúa, cierra por completo — no es un corte sorpresa." },
+    { title: "Restablecer es deliberado", body: "Reabrir tras un cierre requiere mantener presionado el botón grande. Es intencional: te obliga a verificar la instalación antes de reactivar el agua." },
+    { title: "Ajústalo a tu casa", body: "En la pestaña Ajustes defines alertas, tarifa y periodo de corte de tu localidad, y puedes proteger esos ajustes con un PIN." }
+  ];
+  var tutIndex = 0;
+  function renderTutorial() {
+    var s = TUTORIAL_SLIDES[tutIndex];
+    var dots = TUTORIAL_SLIDES.map(function (_, i) { return '<span class="' + (i === tutIndex ? "active" : "") + '"></span>'; }).join("");
+    var isLast = tutIndex === TUTORIAL_SLIDES.length - 1;
+    var html = '<h3>' + s.title + '</h3><p>' + s.body + '</p>' +
+      '<div class="btn-row">' +
+      (tutIndex > 0 ? '<button id="tutPrev">Atrás</button>' : '<button id="tutSkip">Omitir</button>') +
+      '<button class="primary" id="tutNext">' + (isLast ? "Entendido" : "Siguiente") + '</button>' +
+      '</div><div class="tut-dots">' + dots + '</div>';
+    openModal(html);
+    if (tutIndex > 0) document.getElementById("tutPrev").addEventListener("click", function () { tutIndex--; renderTutorial(); });
+    else document.getElementById("tutSkip").addEventListener("click", finishTutorial);
+    document.getElementById("tutNext").addEventListener("click", function () {
+      if (isLast) finishTutorial(); else { tutIndex++; renderTutorial(); }
+    });
+  }
+  function finishTutorial() { state.tutorialSeen = true; persist(); closeModal(); }
+  function showTutorial() { tutIndex = 0; renderTutorial(); }
+  tutorialBtn.addEventListener("click", showTutorial);
+  if (!state.tutorialSeen) showTutorial();
+
+  // ---------- device status: real telemetry when live, simulated preview otherwise ----------
+  var deviceConn = document.getElementById("deviceConn");
+  var batteryPct = 87;
+  var signalLevels = ["●●●○", "●●●●", "●●○○"];
+
+  function rssiToBars(rssi) {
+    if (rssi >= -55) return "●●●●";
+    if (rssi >= -67) return "●●●○";
+    if (rssi >= -78) return "●●○○";
+    return "●○○○";
+  }
+
+  function renderDevice() {
+    var isLiveNow = localToggle.checked && liveTelemetry && (Date.now() - lastLiveTs < 10000);
+    if (isLiveNow) {
+      deviceConn.innerHTML = '<span class="status-dot" style="background:var(--accent-flow);"></span> En línea (real)';
+      deviceBattery.textContent = (liveTelemetry.battery_pct != null ? liveTelemetry.battery_pct : "—") + "% · sin sensor real todavía";
+      deviceSignal.textContent = rssiToBars(liveTelemetry.rssi) + " (" + liveTelemetry.rssi + " dBm)";
+    } else if (localToggle.checked) {
+      deviceConn.innerHTML = '<span class="status-dot" style="background:var(--accent-alarm);"></span> Sin señal';
+      deviceBattery.textContent = "— %";
+      deviceSignal.textContent = "— —";
+    } else {
+      deviceConn.innerHTML = '<span class="status-dot" style="background:var(--accent-flow);"></span> En línea (simulado)';
+      deviceBattery.textContent = Math.round(batteryPct) + "%";
+      deviceSignal.textContent = signalLevels[Math.floor(Date.now() / 4000) % signalLevels.length];
+    }
+  }
+  batteryResetBtn.addEventListener("click", function () { batteryPct = 100; renderDevice(); });
+  setInterval(function () {
+    if (!localToggle.checked) batteryPct = Math.max(3, batteryPct - 0.03);
+    renderDevice();
+  }, 1000);
+
+  // ---------- live local connection (HTTP polling, same WiFi, no accounts) ----------
+  var localHostInput = document.getElementById("localHostInput");
+  var localToggle = document.getElementById("localToggle");
+  var localStatus = document.getElementById("localStatus");
+  if (!state.devices || !state.devices.length) {
+    state.devices = [{ name: "Regadera (casa)", host: state.localHost || "hidrovigia.local" }];
+    state.activeDeviceIndex = 0;
+    persist();
+  }
+  if (state.activeDeviceIndex >= state.devices.length) state.activeDeviceIndex = 0;
+
+  var deviceSelect = document.getElementById("deviceSelect");
+  var addDeviceBtn = document.getElementById("addDeviceBtn");
+  var editDeviceBtn = document.getElementById("editDeviceBtn");
+  var removeDeviceBtn = document.getElementById("removeDeviceBtn");
+
+  function renderDeviceSelect() {
+    deviceSelect.innerHTML = state.devices.map(function (d, i) {
+      return '<option value="' + i + '">' + d.name + ' (' + d.host + ')</option>';
+    }).join("");
+    deviceSelect.value = state.activeDeviceIndex;
+  }
+
+  function applyActiveDevice() {
+    var d = state.devices[state.activeDeviceIndex];
+    if (!d) return;
+    localHostInput.value = d.host;
+    state.localHost = d.host;
+    persist();
+  }
+
+  function deviceFormModal(existingIndex) {
+    var existing = existingIndex != null ? state.devices[existingIndex] : null;
+    var html = '<h3>' + (existing ? "Editar dispositivo" : "Nuevo dispositivo") + '</h3>' +
+      '<p>Nombre y dirección local del ESP32 (por ejemplo hidrovigia.local, o hidrovigia2.local si le pusiste otro nombre en el portal de configuración).</p>' +
+      '<input class="pin-input" style="letter-spacing:normal; font-size:15px; text-align:left;" id="devNameInput" placeholder="Nombre (ej. Regadera casa 1)" value="' + (existing ? existing.name : "") + '">' +
+      '<input class="pin-input" style="letter-spacing:normal; font-size:15px; text-align:left; margin-top:8px;" id="devHostInput" placeholder="hidrovigia.local" value="' + (existing ? existing.host : "") + '">' +
+      '<div class="btn-row" style="margin-top:14px;"><button id="devCancel">Cancelar</button><button class="primary" id="devSave">Guardar</button></div>';
+    openModal(html);
+    document.getElementById("devCancel").addEventListener("click", closeModal);
+    document.getElementById("devSave").addEventListener("click", function () {
+      var name = document.getElementById("devNameInput").value.trim();
+      var host = document.getElementById("devHostInput").value.trim();
+      if (!name || !host) return;
+      if (existing) { existing.name = name; existing.host = host; }
+      else { state.devices.push({ name: name, host: host }); state.activeDeviceIndex = state.devices.length - 1; }
+      persist();
+      renderDeviceSelect();
+      applyActiveDevice();
+      closeModal();
+    });
+  }
+
+  deviceSelect.addEventListener("change", function () {
+    state.activeDeviceIndex = parseInt(deviceSelect.value, 10);
+    applyActiveDevice();
+    yaConfirmoConexion = false;
+    liveTelemetry = null;
+    if (localToggle.checked) { localStatus.textContent = "Conectando…"; pollLocal(); }
+  });
+  addDeviceBtn.addEventListener("click", function () { deviceFormModal(null); });
+  editDeviceBtn.addEventListener("click", function () { deviceFormModal(state.activeDeviceIndex); });
+  removeDeviceBtn.addEventListener("click", function () {
+    if (state.devices.length <= 1) { localStatus.textContent = "Debe quedar al menos un dispositivo."; return; }
+    state.devices.splice(state.activeDeviceIndex, 1);
+    state.activeDeviceIndex = 0;
+    persist();
+    renderDeviceSelect();
+    applyActiveDevice();
+  });
+
+  renderDeviceSelect();
+  applyActiveDevice();
+  localHostInput.addEventListener("input", function () { state.localHost = localHostInput.value; persist(); });
+  renderDevice();
+
+  var liveTelemetry = null;
+  var lastLiveTs = 0;
+  var localPollTimer = null;
+  var yaConfirmoConexion = false;
+
+  var VALVE_LABELS = { open: "abierta", closed: "cerrada" };
+  function showConnectedConfirmation(data) {
+    var valveLabel = VALVE_LABELS[data.valve] || data.valve;
+    var stageLabel = data.stage === 2 ? "cerrada por seguridad" : (data.stage === 1 ? "reducida a 75%" : "normal");
+    var html = '<h3>✅ Dispositivo comunicado</h3>' +
+      '<p>Se conectó correctamente con <strong>' + (localHostInput.value || "hidrovigia.local") + '</strong>.</p>' +
+      '<div class="log-item"><div><div class="log-date">Posición de la válvula</div><div class="log-meta">Etapa: ' + stageLabel + '</div></div>' +
+      '<div class="log-vol">' + valveLabel + '</div></div>' +
+      '<div class="btn-row" style="margin-top:14px;"><button class="primary" id="connOkBtn">Listo</button></div>';
+    openModal(html);
+    document.getElementById("connOkBtn").addEventListener("click", closeModal);
+    setTimeout(function () { if (modalOverlay.style.display === "flex") closeModal(); }, 4000);
+  }
+
+  function pollLocal() {
+    var host = localHostInput.value || "hidrovigia.local";
+    fetch("http://" + host + "/status", { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (data) {
+        liveTelemetry = data; lastLiveTs = Date.now();
+        localStatus.textContent = "✅ En vivo · " + new Date().toLocaleTimeString("es-MX");
+        renderDevice();
+        if (!yaConfirmoConexion) { yaConfirmoConexion = true; showConnectedConfirmation(data); }
+      })
+      .catch(function (err) {
+        localStatus.textContent = "Sin respuesta de " + host + ". Si esta app sigue viviendo dentro de Claude, esto es esperado: el ESP32 debe servir esta misma página para que funcione.";
+        renderDevice();
+      });
+  }
+
+  localToggle.addEventListener("change", function () {
+    if (localToggle.checked) {
+      if (!localHostInput.value) { localStatus.textContent = "Escribe primero la dirección del ESP32."; localToggle.checked = false; return; }
+      localStatus.textContent = "Conectando…";
+      renderDevice();
+      pollLocal();
+      localPollTimer = setInterval(pollLocal, 2000);
+    } else {
+      clearInterval(localPollTimer); localPollTimer = null;
+      liveTelemetry = null;
+      yaConfirmoConexion = false;
+      localStatus.textContent = "Simulado";
+      renderDevice();
+      resetBtn.disabled = currentStage !== 2;
+      simulateBtn.disabled = currentStage === 2;
+      valveHint.textContent = currentStage === 2
+        ? "La válvula se cerró por completo tras flujo continuo prolongado. Verifica la instalación antes de restablecer."
+        : "La válvula está abierta y el sistema monitorea el flujo en tiempo real.";
+    }
+  });
+
+  // ---------- remote valve calibration (PIN + blocked during an active cutoff) ----------
+  var calibPinInput = document.getElementById("calibPinInput");
+  var calibMsg = document.getElementById("calibMsg");
+  var calibControls = document.getElementById("calibControls");
+  var calibEnterRow = document.getElementById("calibEnterRow");
+  var calibPosChip = document.getElementById("calibPosChip");
+  var calibAngle = document.getElementById("calibAngle");
+  var calibEnter = document.getElementById("calibEnter");
+  var calibMinus = document.getElementById("calibMinus");
+  var calibPlus = document.getElementById("calibPlus");
+  var calibNext = document.getElementById("calibNext");
+  var calibSave = document.getElementById("calibSave");
+  var calibCancel = document.getElementById("calibCancel");
+  var POS_LABELS = ["ABIERTA (100%)", "REDUCIDA (75%)", "CERRADA (0%)"];
+
+  function calibHost() { return localHostInput.value || "hidrovigia.local"; }
+  function calibPin() { return encodeURIComponent(calibPinInput.value || ""); }
+
+  function calibFetch(path) {
+    return fetch("http://" + calibHost() + path + (path.indexOf("?") >= 0 ? "&" : "?") + "pin=" + calibPin(), { method: "POST" })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); });
+  }
+
+  function refreshCalibStatus() {
+    fetch("http://" + calibHost() + "/calib/status", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        calibPosChip.textContent = POS_LABELS[data.posicion] || "";
+        calibPosChip.dataset.pos = data.posicion;
+        calibAngle.textContent = data.angulo;
+        if (!data.activo) { calibControls.style.display = "none"; calibEnterRow.style.display = "flex"; }
+      })
+      .catch(function () {});
+  }
+
+  calibEnter.addEventListener("click", function () {
+    if (!calibPinInput.value) { calibMsg.textContent = "Escribe el PIN del dispositivo."; return; }
+    calibMsg.textContent = "Entrando a calibración…";
+    calibFetch("/calib/enter").then(function (res) {
+      if (res.ok) {
+        calibMsg.textContent = "";
+        calibControls.style.display = "block";
+        calibEnterRow.style.display = "none";
+        refreshCalibStatus();
+      } else if (res.body && res.body.error === "cerrado_por_seguridad") {
+        calibMsg.textContent = "Bloqueado: la válvula está cerrada por un evento de seguridad. Restablécela físicamente en el dispositivo antes de calibrar.";
+      } else if (res.body && res.body.error === "pin") {
+        calibMsg.textContent = "PIN incorrecto.";
+      } else {
+        calibMsg.textContent = "No se pudo conectar. Si esta app sigue viviendo dentro de Claude, esto es esperado.";
+      }
+    }).catch(function () {
+      calibMsg.textContent = "No se pudo conectar. Si esta app sigue viviendo dentro de Claude, esto es esperado.";
+    });
+  });
+
+  calibMinus.addEventListener("click", function () { calibFetch("/calib/set?delta=-5").then(refreshCalibStatus); });
+  calibPlus.addEventListener("click", function () { calibFetch("/calib/set?delta=5").then(refreshCalibStatus); });
+  calibNext.addEventListener("click", function () {
+    var nextPos = (parseInt(calibPosChip.dataset.pos || "0", 10) + 1) % 3;
+    calibFetch("/calib/set?pos=" + nextPos).then(refreshCalibStatus);
+  });
+  calibSave.addEventListener("click", function () {
+    calibFetch("/calib/save").then(function (res) {
+      if (res.ok) { calibMsg.textContent = "Calibración guardada."; calibControls.style.display = "none"; calibEnterRow.style.display = "flex"; }
+    });
+  });
+  calibCancel.addEventListener("click", function () {
+    calibFetch("/calib/cancel").then(function (res) {
+      if (res.ok) { calibMsg.textContent = "Cambios descartados."; calibControls.style.display = "none"; calibEnterRow.style.display = "flex"; }
+    });
+  });
+
+  if ("serviceWorker" in navigator) {
+    try { navigator.serviceWorker.register("sw.js"); } catch (e) { /* entorno sin soporte (p. ej. la vista previa de Claude): se ignora */ }
+  }
+
+  showStageChip(); updateGraceUI(); updateChart();
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>
