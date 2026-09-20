@@ -459,6 +459,8 @@
       </div>
       <label class="switch"><input type="checkbox" id="localToggle"><span class="track"></span><span class="thumb"></span></label>
     </div>
+    <div class="btn-row" style="margin-top:12px;"><button id="wifiResetBtn" class="danger">Conectar el ESP32 a otra WiFi</button></div>
+    <p class="hint" style="margin-top:6px;">Usa el mismo PIN de "Calibración remota" de abajo. El ESP32 se reinicia y vuelve a crear la red <strong>HIDROVIGIA-Setup</strong> para que la configures de nuevo desde ahí, igual que la primera vez.</p>
   </div>
 
   <div class="section">
@@ -1465,6 +1467,39 @@
         updateLiveBadge();
       });
   }
+
+  var wifiResetBtn = document.getElementById("wifiResetBtn");
+  function ejecutarWifiReset() {
+    var pin = (typeof calibPinInput !== "undefined" && calibPinInput) ? calibPinInput.value : "";
+    var host = localHostInput.value || "hidrovigia.local";
+    localStatus.textContent = "Pidiendo reinicio de WiFi…";
+    fetch("http://" + host + "/wifi/reset?pin=" + encodeURIComponent(pin), { method: "POST" })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+      .then(function (res) {
+        if (res.ok) {
+          localStatus.textContent = "Listo. Busca la red \"HIDROVIGIA-Setup\" desde tu celular para configurarla de nuevo.";
+          localToggle.checked = false;
+          clearInterval(localPollTimer); localPollTimer = null;
+          liveTelemetry = null; yaConfirmoConexion = false;
+          updateLiveBadge();
+        } else if (res.body && res.body.error === "pin") {
+          localStatus.textContent = "PIN incorrecto — no se reinició el WiFi.";
+        } else {
+          localStatus.textContent = "El ESP32 no respondió al intento de reinicio.";
+        }
+      })
+      .catch(function () { localStatus.textContent = "No se pudo conectar al ESP32."; });
+  }
+  wifiResetBtn.addEventListener("click", function () {
+    var pin = (typeof calibPinInput !== "undefined" && calibPinInput) ? calibPinInput.value : "";
+    if (!pin) { localStatus.textContent = "Escribe el PIN en \"Calibración remota\" primero."; return; }
+    var html = '<h3>¿Reconfigurar WiFi?</h3>' +
+      '<p>El ESP32 se desconectará de su red actual y creará de nuevo el punto de acceso <strong>HIDROVIGIA-Setup</strong> para que la configures otra vez, como la primera vez.</p>' +
+      '<div class="btn-row"><button id="wifiResetCancel">Cancelar</button><button class="danger" id="wifiResetConfirm">Sí, reconfigurar</button></div>';
+    openModal(html);
+    document.getElementById("wifiResetCancel").addEventListener("click", closeModal);
+    document.getElementById("wifiResetConfirm").addEventListener("click", function () { closeModal(); ejecutarWifiReset(); });
+  });
 
   localToggle.addEventListener("change", function () {
     if (localToggle.checked) {
