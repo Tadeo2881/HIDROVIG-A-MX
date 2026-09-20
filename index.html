@@ -377,10 +377,24 @@
     </div>
     <p class="import-status" id="cityNote"></p>
     <div class="tariff-row"><label for="periodDaysInput">Periodo de corte (días)</label><input type="number" id="periodDaysInput" min="7" max="120" step="1" value="60"></div>
+
+    <div style="background:var(--bg-2); border-radius:12px; padding:12px; margin:10px 0;">
+      <div style="font-size:12.5px; font-weight:600; margin-bottom:4px;">¿Tu recibo no desglosa bloques?</div>
+      <p class="hint" style="margin-bottom:10px;">Si solo dice "Total a pagar" sin explicar cómo se calculó, no batalles con los campos de abajo — pon aquí lo que pagaste la última vez y cuántos m³ consumiste, y la app calcula una tarifa plana equivalente por ti.</p>
+      <div class="tariff-row"><label for="simpleTotalInput">Pagaste (MXN)</label><input type="number" id="simpleTotalInput" min="0" step="1" placeholder="350"></div>
+      <div class="tariff-row"><label for="simpleM3Input">Consumiste (m³)</label><input type="number" id="simpleM3Input" min="0.1" step="0.1" placeholder="18"></div>
+      <div class="btn-row" style="margin-top:8px;"><button id="simpleCalcBtn">Usar este cálculo</button></div>
+    </div>
+
+    <p class="hint" style="margin-bottom:4px;"><strong>O, si tu recibo sí trae el desglose por bloques</strong> (busca algo como "0-10 m³: $X, excedente: $Y"), llénalo directo aquí:</p>
     <div class="tariff-row"><label for="baseFeeInput">Cuota fija (MXN)</label><input type="number" id="baseFeeInput" min="0" step="1" value="0"></div>
+    <p class="hint" style="margin:-6px 0 8px;">El cargo mínimo que pagas exista o no consumo (a veces se llama "cargo por servicio" o "cuota de saneamiento").</p>
     <div class="tariff-row"><label for="tier1LimitInput">Bloque 1 hasta (m³)</label><input type="number" id="tier1LimitInput" min="1" step="1" value="10"></div>
+    <p class="hint" style="margin:-6px 0 8px;">Hasta cuántos m³ te cobran la tarifa "barata" — ej. "los primeros 10 m³".</p>
     <div class="tariff-row"><label for="tier1RateInput">Tarifa bloque 1 (MXN/m³)</label><input type="number" id="tier1RateInput" min="0" step="0.5" value="8"></div>
+    <p class="hint" style="margin:-6px 0 8px;">Cuánto cuesta cada m³ dentro de ese bloque inicial.</p>
     <div class="tariff-row"><label for="tier2RateInput">Tarifa excedente (MXN/m³)</label><input type="number" id="tier2RateInput" min="0" step="0.5" value="22"></div>
+    <p class="hint" style="margin:-6px 0 8px;">Cuánto cuesta cada m³ que consumas por encima del bloque 1 (casi siempre más caro).</p>
     <div class="progress-track"><div class="progress-fill" id="periodFill" style="animation:none;"></div></div>
     <div class="progress-label"><span id="periodLabel">0.0 m³ este periodo</span><span id="periodDaysLeft">faltan 60 días</span></div>
     <div class="cost-line" id="periodCost" style="margin-top:8px;">≈ $0.00 MXN estimado del periodo</div>
@@ -670,6 +684,23 @@
   var graceNote = document.getElementById("graceNote");
   var alertsToggle = document.getElementById("alertsToggle");
   var periodDaysInput = document.getElementById("periodDaysInput");
+  var simpleTotalInput = document.getElementById("simpleTotalInput");
+  var simpleM3Input = document.getElementById("simpleM3Input");
+  var simpleCalcBtn = document.getElementById("simpleCalcBtn");
+  simpleCalcBtn.addEventListener("click", function () {
+    var total = parseFloat(simpleTotalInput.value);
+    var m3 = parseFloat(simpleM3Input.value);
+    if (!total || !m3 || m3 <= 0) { cityNote.textContent = "Escribe cuánto pagaste y cuántos m³ consumiste para calcular."; return; }
+    var tarifaPlana = +(total / m3).toFixed(2);
+    state.baseFee = 0; state.tier1Limit = 9999; state.tier1Rate = tarifaPlana; state.tier2Rate = tarifaPlana;
+    baseFeeInput.value = 0; tier1LimitInput.value = 9999; tier1RateInput.value = tarifaPlana; tier2RateInput.value = tarifaPlana;
+    citySelect.value = "personalizado";
+    cityNote.textContent = "Calculado: $" + tarifaPlana + " MXN por m³ en promedio (a partir de $" + total + " ÷ " + m3 + " m³). Es una tarifa plana aproximada, no el desglose real por bloques — sirve para estimar, no para reclamos ante tu organismo operador.";
+    persist();
+    if (checkPeriodRollover()) renderHistory();
+    renderPeriod();
+  });
+
   var baseFeeInput = document.getElementById("baseFeeInput");
   var tier1LimitInput = document.getElementById("tier1LimitInput");
   var tier1RateInput = document.getElementById("tier1RateInput");
