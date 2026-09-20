@@ -298,19 +298,22 @@
 
   <div class="section">
     <h2>Reducción por tiempo continuo</h2>
-    <p class="hint" id="stageHint">El sistema no corta de golpe: primero reduce la presión y, si el flujo continúa, cierra por completo. Ajusta el umbral en segundos para verlo en vivo.</p>
-    <div class="stage-row">
-      <label for="stage1Slider">Reduce a 75%</label>
-      <input type="range" id="stage1Slider" min="8" max="60" step="1" value="20">
-      <span class="stage-readout" id="stage1Readout">20 s</span>
+    <p class="hint" id="stageHint">Demostración a escala de segundos, para ver el comportamiento sin esperar minutos reales. Esto NO controla tu ESP32: el firmware real trae los tiempos fijos en minutos.</p>
+    <p class="hint" id="liveStageNote" style="display:none; color:var(--accent-flow);"></p>
+    <div id="demoStageControls">
+      <div class="stage-row">
+        <label for="stage1Slider">Reduce a 75%</label>
+        <input type="range" id="stage1Slider" min="8" max="60" step="1" value="20">
+        <span class="stage-readout" id="stage1Readout">20 s</span>
+      </div>
+      <div class="stage-row">
+        <label>Cierre total</label>
+        <input type="range" disabled style="opacity:0.35">
+        <span class="stage-readout" id="stage2Readout">30 s</span>
+      </div>
+      <div class="timeline"><div class="seg normal" id="segNormal" style="width:66%"></div><div class="seg reduced" id="segReduced" style="width:34%"></div></div>
+      <div class="marker-row"><span>0 s</span><span id="stage1Marker">etapa 1</span><span id="stage2Marker">etapa 2</span></div>
     </div>
-    <div class="stage-row">
-      <label>Cierre total</label>
-      <input type="range" disabled style="opacity:0.35">
-      <span class="stage-readout" id="stage2Readout">30 s</span>
-    </div>
-    <div class="timeline"><div class="seg normal" id="segNormal" style="width:66%"></div><div class="seg reduced" id="segReduced" style="width:34%"></div></div>
-    <div class="marker-row"><span>0 s</span><span id="stage1Marker">etapa 1</span><span id="stage2Marker">etapa 2</span></div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-label"><span id="progressLabel">flujo continuo: 0 s</span><span id="progressPct">0%</span></div>
   </div>
@@ -507,7 +510,7 @@
   // vez al instalar el dispositivo en ese punto de la casa (regadera, cocina, etc.),
   // no se elige a diario, así que la app ya no ofrece un selector de modo.
   var PROFILE = { stage1: 20, min: 10, max: 60, allowGrace: true,
-    hint: "El sistema no corta de golpe: primero reduce la presión y, si el flujo continúa, cierra por completo. Puedes extender la sesión una vez que entra en reducción." };
+    hint: "Demostración a escala de segundos: no controla tu ESP32 real (ese trae los tiempos fijos en minutos). Primero reduce a 75%, y si el flujo sigue, cierra por completo. Puedes extender la sesión una vez que entra en reducción." };
   var STAGE_RATIO = 1.5;
 
   var state = {
@@ -1206,6 +1209,22 @@
       if (currentStage === 2) setStatus("alarm", "Cierre preventivo activo (en vivo)");
       else if (currentStage === 1) setStatus("warn", "Reducido a 75% (en vivo)");
       else setStatus("ok", "Normal (en vivo)");
+
+      // Tarjeta de reducción: en vivo se muestran los umbrales reales del
+      // ESP32 (fijos en minutos), no la perilla de demostración en segundos.
+      document.getElementById("demoStageControls").style.display = "none";
+      var liveNote = document.getElementById("liveStageNote");
+      liveNote.style.display = "block";
+      var LIVE_S1 = 600, LIVE_S2 = 900; // 10 min y 15 min, iguales a LIMITE_REDUCCION_MS/LIMITE_FLUJO_CONTINUO_MS en el firmware
+      var minTranscurridos = Math.floor(continuousSeconds / 60);
+      var segRestantes = continuousSeconds % 60;
+      liveNote.textContent = "En vivo: tu ESP32 usa 10 min (75%) y 15 min (cierre), fijos en el firmware. Flujo continuo: " + minTranscurridos + " min " + segRestantes + " s.";
+      var pctLive = Math.min(100, (continuousSeconds / LIVE_S2) * 100);
+      progressFill.style.width = pctLive + "%";
+      progressFill.className = "progress-fill" + (currentStage === 2 ? " alarm" : (currentStage === 1 ? " warn" : ""));
+      progressLabel.textContent = "flujo continuo: " + minTranscurridos + "m " + segRestantes + "s";
+      progressPct.textContent = Math.round(pctLive) + "%";
+
       if (Math.random() < 0.02) { checkPeriodRollover(); persist(); renderHistory(); }
       return;
     }
@@ -1462,6 +1481,8 @@
       localStatus.textContent = "Simulado";
       renderDevice();
       updateLiveBadge();
+      document.getElementById("demoStageControls").style.display = "block";
+      document.getElementById("liveStageNote").style.display = "none";
       resetBtn.disabled = currentStage !== 2;
       simulateBtn.disabled = currentStage === 2;
       valveHint.textContent = currentStage === 2
