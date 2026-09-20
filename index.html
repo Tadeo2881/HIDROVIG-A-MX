@@ -279,6 +279,7 @@
     </div>
 
     <span class="stage-chip hidden" id="stageChip"></span>
+    <div class="cost-line" id="liveBadge" style="margin-top:8px;">⚪ Simulado</div>
 
     <div class="chart-wrap">
       <svg class="flow-chart" id="flowChart" viewBox="0 0 300 86" preserveAspectRatio="none">
@@ -428,7 +429,7 @@
 
   <div class="section">
     <h2>Conexión local (ESP32)</h2>
-    <p class="hint">Sin cuentas ni nube: la app le pregunta directo al ESP32 por su estado, siempre que ambos estén en la misma red WiFi. El cierre y el restablecimiento se deciden y ejecutan siempre en el propio ESP32 — esta app solo puede leer su estado, nunca controlarlo a distancia. <strong>No funcionará mientras esta app viva dentro de Claude</strong> (el entorno bloquea salidas de red); funciona en cuanto el ESP32 sirva esta misma página directamente (ver el sketch que te dejé).</p>
+    <p class="hint">Sin cuentas ni nube: la app le pregunta directo al ESP32 por su estado, siempre que ambos estén en la misma red WiFi. Como este dispositivo no tiene pantalla táctil ni botones físicos, el restablecimiento tras un cierre también se hace desde aquí, protegido con el PIN del dispositivo. <strong>No funcionará mientras esta app viva dentro de Claude</strong> (el entorno bloquea salidas de red); funciona en cuanto el ESP32 sirva esta misma página directamente (ver el sketch que te dejé).</p>
     <div class="tariff-row"><label for="deviceSelect">Dispositivo activo</label>
       <select id="deviceSelect" style="flex:1; padding:9px 10px; border-radius:10px; border:1px solid var(--border); background:var(--bg-2); color:var(--text); font-family:inherit; font-size:12.5px;"></select>
     </div>
@@ -1014,12 +1015,38 @@
     alertClosed();
   }
 
-  function doReset() {
+  function doResetSimulado() {
     valveOpen = true; alarmActive = false; continuousSeconds = 0; currentStage = 0; graceUsed = 0; preWarned = false;
     simulateBtn.disabled = false; resetBtn.disabled = true;
     valveHint.textContent = "La válvula está abierta y el sistema monitorea el flujo en tiempo real.";
     setStatus("ok", "Normal");
     showStageChip(); updateGraceUI();
+  }
+
+  function doReset() {
+    var isLiveNow = localToggle.checked && liveTelemetry && (Date.now() - lastLiveTs < 10000);
+    if (!isLiveNow) { doResetSimulado(); return; }
+
+    if (!calibPinInput.value) {
+      valveHint.textContent = "Escribe el PIN del dispositivo en \"Calibración remota\" (Ajustes) para poder restablecer.";
+      return;
+    }
+    valveHint.textContent = "Restableciendo…";
+    var host = localHostInput.value || "hidrovigia.local";
+    fetch("http://" + host + "/reset?pin=" + encodeURIComponent(calibPinInput.value), { method: "POST" })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+      .then(function (res) {
+        if (res.ok) {
+          valveHint.textContent = "Restablecido. Mostrando el estado real reportado por el ESP32.";
+        } else if (res.body && res.body.error === "pin") {
+          valveHint.textContent = "PIN incorrecto — no se restableció.";
+        } else {
+          valveHint.textContent = "El ESP32 rechazó el restablecimiento (puede que ya no esté cerrada).";
+        }
+      })
+      .catch(function () {
+        valveHint.textContent = "No se pudo conectar al ESP32 para restablecer.";
+      });
   }
 
   var holdTimer = null, holdStart = null, HOLD_MS = 1400;
@@ -1119,6 +1146,7 @@
   });
 
   function tick() {
+    updateLiveBadge();
     var isLive = localToggle.checked && liveTelemetry && (Date.now() - lastLiveTs < 10000);
 
     if (isLive) {
@@ -1139,10 +1167,10 @@
       renderPeriod();
       updateChart();
       showStageChip(); updateGraceUI();
-      resetBtn.disabled = true;
+      resetBtn.disabled = currentStage !== 2;
       simulateBtn.disabled = true;
       valveHint.textContent = currentStage === 2
-        ? "La válvula está cerrada según el ESP32. Restablécela físicamente en el dispositivo — esta app no puede reabrirla de forma remota, por diseño."
+        ? "La válvula está cerrada por seguridad. Mantén presionado para restablecerla (se envía al ESP32 con tu PIN de dispositivo)."
         : "Mostrando el estado real reportado por el ESP32.";
       if (currentStage === 2) setStatus("alarm", "Cierre preventivo activo (en vivo)");
       else if (currentStage === 1) setStatus("warn", "Reducido a 75% (en vivo)");
@@ -1360,6 +1388,16 @@
     setTimeout(function () { if (modalOverlay.style.display === "flex") closeModal(); }, 4000);
   }
 
+  var liveBadge = document.getElementById("liveBadge");
+  function updateLiveBadge() {
+    if (!localToggle.checked) { liveBadge.textContent = "⚪ Simulado"; return; }
+    if (liveTelemetry && (Date.now() - lastLiveTs < 10000)) {
+      liveBadge.textContent = "🟢 En vivo · " + new Date(lastLiveTs).toLocaleTimeString("es-MX") + " · " + (state.devices[state.activeDeviceIndex] ? state.devices[state.activeDeviceIndex].name : "");
+    } else {
+      liveBadge.textContent = "🔴 Sin señal del ESP32";
+    }
+  }
+
   function pollLocal() {
     var host = localHostInput.value || "hidrovigia.local";
     fetch("http://" + host + "/status", { cache: "no-store" })
@@ -1368,11 +1406,13 @@
         liveTelemetry = data; lastLiveTs = Date.now();
         localStatus.textContent = "✅ En vivo · " + new Date().toLocaleTimeString("es-MX");
         renderDevice();
+        updateLiveBadge();
         if (!yaConfirmoConexion) { yaConfirmoConexion = true; showConnectedConfirmation(data); }
       })
       .catch(function (err) {
         localStatus.textContent = "Sin respuesta de " + host + ". Si esta app sigue viviendo dentro de Claude, esto es esperado: el ESP32 debe servir esta misma página para que funcione.";
         renderDevice();
+        updateLiveBadge();
       });
   }
 
@@ -1381,6 +1421,7 @@
       if (!localHostInput.value) { localStatus.textContent = "Escribe primero la dirección del ESP32."; localToggle.checked = false; return; }
       localStatus.textContent = "Conectando…";
       renderDevice();
+      updateLiveBadge();
       pollLocal();
       localPollTimer = setInterval(pollLocal, 2000);
     } else {
@@ -1389,6 +1430,7 @@
       yaConfirmoConexion = false;
       localStatus.textContent = "Simulado";
       renderDevice();
+      updateLiveBadge();
       resetBtn.disabled = currentStage !== 2;
       simulateBtn.disabled = currentStage === 2;
       valveHint.textContent = currentStage === 2
